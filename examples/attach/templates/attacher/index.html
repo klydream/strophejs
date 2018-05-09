@@ -1,10 +1,11 @@
+{% load static %}
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns='http://www.w3.org/1999/xhtml'>
   <head>
     <title>Strophe Attach Example</title>
     <script language='javascript'
 	    type='text/javascript'
-	    src='http://ajax.googleapis.com/ajax/libs/jquery/1.2.6/jquery.min.js'></script>
+	    src='{% static 'js/jquery.min.js' %}'></script>
     <script language='javascript'
 	    type='text/javascript'
 	    src='http://code.stanziq.com/svn/strophe/trunk/strophejs/b64.js'></script>
@@ -16,24 +17,24 @@
 	    src='http://code.stanziq.com/svn/strophe/trunk/strophejs/sha1.js'></script>
     <script language='javascript'
 	    type='text/javascript'
-	    src='http://code.stanziq.com/svn/strophe/trunk/strophejs/strophe.js'></script>
+	    src='{% static 'js/strophe.js' %}'></script>
     <script language='javascript'
 	    type='text/javascript'>
       <!--
 	  var ATTACH_SID = "{{ sid }}";
 	  var ATTACH_RID = "{{ rid }}";
 	  var ATTACH_JID = "{{ jid }}";
-	  var BOSH_SERVICE = '/xmpp-httpbind';
+	  var BOSH_SERVICE = 'http://230.68.225.35.bc.googleusercontent.com:5280/bosh';
 	  var connection = null;
 	  var startTime = null;
 
-          function log(msg)
+      function log(msg)
 	  {
 	      $('#log').append('<div></div>').append(
 	          document.createTextNode(msg));
 	  }
 
-	  function onConnect(status) 
+	  function onConnect(status)
 	  {
 	      if (status == Strophe.Status.DISCONNECTED)
 	          log('Disconnected.');
@@ -43,15 +44,16 @@
 	      var elapsed = (new Date()) - startTime;
 	      log('Response from jabber.org took ' + elapsed + 'ms.');
           }
-	  
+
 	  $(document).ready(function () {
 	      // create the connection and attach it
 	      connection = new Strophe.Connection(BOSH_SERVICE);
-	      connection.rawInput = function (data) { 
-	          log('RECV: ' + data); 
+	      connection.rawInput = function (data) {
+	          log('RECV: ' + data);
 	      };
-	      connection.rawOutput = function (data) { 
-	          log('SENT: ' + data); 
+	      connection.rawOutput = function (data) {
+	          log('SENT: ' + data);
+	          log('SENT: ' + ATTACH_SID + ATTACH_RID + ATTACH_JID);
 	      };
 	      // uncomment for extra debugging
 	      // Strophe.log = function (lvl, msg) { log(msg); };
@@ -59,11 +61,11 @@
 	                        onConnect);
 
               // set up handler
-	      connection.addHandler(onResult, null, 'iq', 
+	      connection.addHandler(onResult, null, 'iq',
 	                            'result', 'disco-1', null);
 
               log('Strophe is attached.');
-				
+
 	      // send disco#info to jabber.org
 	      var iq = $iq({to: 'jabber.org',
 	                    type: 'get',
