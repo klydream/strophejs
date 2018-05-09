@@ -1,7 +1,7 @@
 import sys, os
-import httplib, urllib
+import http, urllib
 import random, binascii
-from urlparse import urlparse
+from urllib.parse import urlparse
 
 from punjab.httpb import HttpbParse
 
@@ -26,7 +26,7 @@ class BOSHClient:
         self.headers = {"Content-type": "text/xml",
                         "Accept": "text/xml"}
 
-	self.bosh_service = urlparse(bosh_service)
+        self.bosh_service = urlparse(bosh_service)
         
     def buildBody(self, child=None):
         """Build a BOSH body.
@@ -49,16 +49,16 @@ class BOSHClient:
         """
 
         parser = HttpbParse(True)
-
+        print("1111111111", body.toXml())
         # start new session
-        conn = httplib.HTTPConnection(self.bosh_service.netloc)
-        conn.request("POST", self.bosh_service.path, 
-		     body.toXml(), self.headers)
+        conn = http.client.HTTPConnection(self.bosh_service.netloc)
+        conn.request("POST", self.bosh_service.path, body.toXml(), self.headers)
 
         response = conn.getresponse()
-	data = ''
+        data = ''
         if response.status == 200:
             data = response.read()
+            print("2222222222222222", data)
         conn.close()
 
         return parser.parse(data)
@@ -76,10 +76,8 @@ class BOSHClient:
         body['window'] = '5'
         body['xml:lang'] = 'en'
 
-
         retb, elems = self.sendBody(body)
-        if type(retb) != str and retb.hasAttribute('authid') and \
-		retb.hasAttribute('sid'):
+        if type(retb) != str and retb.hasAttribute('authid') and retb.hasAttribute('sid'):
             self.authid = retb['authid']
             self.sid = retb['sid']
 
@@ -89,26 +87,25 @@ class BOSHClient:
             
             # TODO: add authzid
             if auth['mechanism'] == 'PLAIN':
-                auth_str = ""
-                auth_str += "\000"
+                auth_str = b"\000"
                 auth_str += self.jabberid.user.encode('utf-8')
-                auth_str += "\000"
+                auth_str += b"\000"
                 try:
                     auth_str += self.password.encode('utf-8').strip()
                 except UnicodeDecodeError:
-                    auth_str += self.password.decode('latin1') \
-		        .encode('utf-8').strip()
+                    auth_str += self.password.decode('latin1').encode('utf-8').strip()
                         
-                auth.addContent(binascii.b2a_base64(auth_str))
-                
+                auth.addContent(bytes.decode(binascii.b2a_base64(auth_str)))
                 retb, elems = self.sendBody(self.buildBody(auth))
+                retb, elems = self.sendBody(self.buildBody())
+                print(len(elems), elems)
                 if len(elems) == 0:
-		    # poll for data
+                    # poll for data
                     retb, elems = self.sendBody(self.buildBody())
 
                 if len(elems) > 0:
                     if elems[0].name == 'success':
-                        retb, elems = self.sendBody(self.buildBody())
+                        #retb, elems = self.sendBody(self.buildBody())
                         
                         has_bind = False
                         for child in elems[0].children:
@@ -116,16 +113,16 @@ class BOSHClient:
                                 has_bind = True
                                 break
 
-                        if has_bind:
+                        if not has_bind:
                             iq = domish.Element(('jabber:client', 'iq'))
                             iq['type'] = 'set'
                             iq.addUniqueId()
                             iq.addElement('bind')
                             iq.bind['xmlns'] = BIND_XMLNS
                             if self.jabberid.resource:
-				iq.bind.addElement('resource')
-				iq.bind.resource.addContent(
-				    self.jabberid.resource)
+                                iq.bind.addElement('resource')
+                                iq.bind.resource.addContent(
+                                self.jabberid.resource)
 
                             retb, elems = self.sendBody(self.buildBody(iq))
                             if type(retb) != str and retb.name == 'body':
@@ -138,11 +135,10 @@ class BOSHClient:
 
                                 retb, elems = self.sendBody(self.buildBody(iq))
 
-				# did not bind, TODO - add a retry?
+                                # did not bind, TODO - add a retry?
                                 if type(retb) != str and retb.name == 'body':
                                     self.logged_in = True
-				    # bump up the rid, punjab already 
-				    # received self.rid
+                                    # bump up the rid, punjab already received self.rid
                                     self.rid += 1
 
 
@@ -153,6 +149,6 @@ if __name__ == '__main__':
 
     c = BOSHClient(USERNAME, PASSWORD, SERVICE)
     c.startSessionAndAuth()
+    print(c.jabberid.full(), c.sid, c.rid)
 
-    print c.logged_in
-    
+    print(c.logged_in)

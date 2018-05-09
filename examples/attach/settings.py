@@ -1,7 +1,9 @@
-# Django settings for attach project.
+import os
+
+# Build paths inside the project like this: os.path.join(BASE_DIR, ...)
+BASE_DIR = "/home/larry/project/xmpp/strophejs/examples/attach"
 
 DEBUG = True
-TEMPLATE_DEBUG = DEBUG
 
 ADMINS = (
     ('Some Body', 'romeo@example.com'),
@@ -47,39 +49,67 @@ MEDIA_URL = ''
 # Examples: "http://foo.com/media/", "/media/".
 ADMIN_MEDIA_PREFIX = '/media/'
 
-# Make this unique, and don't share it with anybody.
-SECRET_KEY = 'asdf'
 
 # List of callables that know how to import templates from various sources.
-TEMPLATE_LOADERS = (
-    'django.template.loaders.filesystem.load_template_source',
-    'django.template.loaders.app_directories.load_template_source',
-#     'django.template.loaders.eggs.load_template_source',
-)
+# TEMPLATE_LOADERS = (
+#     'django.template.loaders.filesystem.load_template_source',
+#     'django.template.loaders.app_directories.load_template_source',
+# #     'django.template.loaders.eggs.load_template_source',
+# )
 
-MIDDLEWARE_CLASSES = (
-    'django.middleware.common.CommonMiddleware',
-    'django.contrib.sessions.middleware.SessionMiddleware',
-    'django.contrib.auth.middleware.AuthenticationMiddleware',
-)
-
-ROOT_URLCONF = 'attach.urls'
-
-TEMPLATE_DIRS = (
-    # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
-    # Always use forward slashes, even on Windows.
-    # Don't forget to use absolute paths, not relative paths.
-    '/path/to/attach/templates',
-)
+# TEMPLATE_DIRS = (
+#     # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
+#     # Always use forward slashes, even on Windows.
+#     # Don't forget to use absolute paths, not relative paths.
+#     '/home/larry/project/xmpp/strophejs/examples/attach/templates',
+# )
 
 INSTALLED_APPS = (
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
+    'django.contrib.staticfiles',
     'django.contrib.sites',
     'attach.attacher',
 )
 
-BOSH_SERVICE = 'http://example.com/xmpp-httpbind'
-JABBERID = 'romeo@example.com/bosh'
-PASSWORD = 'juliet.is.hawt'
+MIDDLEWARE = [
+    'django.middleware.security.SecurityMiddleware',
+    'django.contrib.sessions.middleware.SessionMiddleware',
+    'django.middleware.common.CommonMiddleware',
+    'django.middleware.csrf.CsrfViewMiddleware',
+    'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'django.contrib.messages.middleware.MessageMiddleware',
+    'django.middleware.clickjacking.XFrameOptionsMiddleware',
+]
+
+BOSH_SERVICE = 'http://230.68.225.35.bc.googleusercontent.com:5280/bosh'
+JABBERID = 'larry@yanyundata.cn'
+PASSWORD = '790628'
+
+# Make this unique, and don't share it with anybody.
+SECRET_KEY = 'asdf'
+
+ROOT_URLCONF = 'attach.urls'
+
+TEMPLATES = [
+    {
+        'BACKEND': 'django.template.backends.django.DjangoTemplates',
+        'DIRS': [os.path.join(BASE_DIR, 'templates')],
+        'APP_DIRS': True,
+        'OPTIONS': {
+            'context_processors': [
+                'django.template.context_processors.debug',
+                'django.template.context_processors.request',
+                'django.contrib.auth.context_processors.auth',
+                'django.contrib.messages.context_processors.messages',
+            ],
+        },
+    },
+]
+
+STATIC_URL = '/static/'
+STATICFILES_DIRS = (
+    # os.path.join(BASE_DIR, 'static')
+    os.path.join(os.path.dirname(__file__), '../static/').replace('\\', '/'),
+)
